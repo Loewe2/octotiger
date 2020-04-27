@@ -67,7 +67,7 @@ endif()
 ################################################################################
 find_package(HPX REQUIRED NO_CMAKE_PACKAGE_REGISTRY)
 find_package(Silo REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED serialization)
 if(NOT MSVC)
   find_package(Threads REQUIRED)  # Required by target gen_rotating_star_init
 endif()
