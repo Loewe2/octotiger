@@ -16,7 +16,7 @@ project(octotiger CXX)
 
 # Search path for CMake modules to be loaded by include() and find_package()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 ################################################################################
 # Options
 ################################################################################
@@ -220,7 +220,7 @@ set(header_files
     octotiger/test_problems/rotating_star.hpp
 )
 
-list(APPEND octo_dependencies Silo::silo Vc::Vc Boost::boost)
+list(APPEND octo_dependencies Silo::silo Vc::Vc Boost::boost Boost::serialization)
 if(OCTOTIGER_WITH_KOKKOS)
   list(APPEND octo_dependencies Kokkos::kokkos)
 endif()
