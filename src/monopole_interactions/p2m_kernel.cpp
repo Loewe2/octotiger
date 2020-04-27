@@ -36,14 +36,14 @@ namespace fmm {
         }
 
         void p2m_kernel::apply_stencil(
-            struct_of_array_data<expansion, real, 20, ENTRIES, SOA_PADDING>& local_expansions_SoA,
-            struct_of_array_data<space_vector, real, 3, ENTRIES, SOA_PADDING>& center_of_masses_SoA,
+            const struct_of_array_data<expansion, real, 20, ENTRIES, SOA_PADDING>& local_expansions_SoA,
+            const struct_of_array_data<space_vector, real, 3, ENTRIES, SOA_PADDING>& center_of_masses_SoA,
             struct_of_array_data<expansion, real, 20, INNER_CELLS, SOA_PADDING>&
                 potential_expansions_SoA,
             struct_of_array_data<space_vector, real, 3, INNER_CELLS, SOA_PADDING>&
                 angular_corrections_SoA,
-            const std::vector<multiindex<>>& stencil, gsolve_type type, bool (&z_skip)[3][3][3],
-            bool (&y_skip)[3][3], bool (&x_skip)[3]) {
+            const std::vector<multiindex<>>& stencil, gsolve_type type, const bool (&z_skip)[3][3][3],
+            const bool (&y_skip)[3][3], const bool (&x_skip)[3]) {
             // for(auto i = 0; i < local_expansions.size(); i++)
             //   std::cout << local_expansions[i] << " ";
             // for (multiindex<>& stencil_element : stencil) {
@@ -178,9 +178,9 @@ namespace fmm {
         }
 
         void p2m_kernel::blocked_interaction_rho(
-            struct_of_array_data<expansion, real, 20, ENTRIES,
+            const struct_of_array_data<expansion, real, 20, ENTRIES,
                 SOA_PADDING>& __restrict__ local_expansions_SoA,
-            struct_of_array_data<space_vector, real, 3, ENTRIES,
+            const struct_of_array_data<space_vector, real, 3, ENTRIES,
                 SOA_PADDING>& __restrict__ center_of_masses_SoA,
             struct_of_array_data<expansion, real, 20, INNER_CELLS,
                 SOA_PADDING>& __restrict__ potential_expansions_SoA,
@@ -430,8 +430,8 @@ namespace fmm {
         }
 
         void p2m_kernel::blocked_interaction_non_rho(
-            struct_of_array_data<expansion, real, 20, ENTRIES, SOA_PADDING>& local_expansions_SoA,
-            struct_of_array_data<space_vector, real, 3, ENTRIES, SOA_PADDING>& center_of_masses_SoA,
+            const struct_of_array_data<expansion, real, 20, ENTRIES, SOA_PADDING>& local_expansions_SoA,
+            const struct_of_array_data<space_vector, real, 3, ENTRIES, SOA_PADDING>& center_of_masses_SoA,
             struct_of_array_data<expansion, real, 20, INNER_CELLS, SOA_PADDING>&
                 potential_expansions_SoA,
             struct_of_array_data<space_vector, real, 3, INNER_CELLS, SOA_PADDING>&
