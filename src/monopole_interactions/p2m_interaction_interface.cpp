@@ -12,9 +12,43 @@
 #include <algorithm>
 #include <array>
 #include <vector>
+// #include <string>
+
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/array.hpp>
+#include <boost/serialization/extended_type_info.hpp>
 
 // Big picture questions:
 // - use any kind of tiling?
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+namespace boost {
+namespace serialization {
+
+template<class Archive, typename T>
+void serialize(Archive & ar, octotiger::fmm::multiindex<T> & g, const unsigned int version)
+{
+    ar & g.x;
+    ar & g.y;
+    ar & g.z;
+}
+
+} // namespace seriali
+}
+template <typename>
+class my_trait;
+
+template <typename AoS_type_t, typename component_type_t, size_t num_components_v, size_t entries_v, 
+        size_t padding_v, typename backend_t_t>
+struct my_trait<octotiger::fmm::struct_of_array_data<AoS_type_t, component_type_t, num_components_v, entries_v, padding_v, backend_t_t>> {
+    using aos_type = AoS_type_t;
+    using component_type = component_type_t;
+    static constexpr size_t num_components = num_components_v;
+    static constexpr size_t entries = entries_v;
+    static constexpr size_t padding = padding_v;
+    using backend_type = backend_t_t;
+};
+
 
 namespace octotiger {
 namespace fmm {
@@ -57,9 +91,43 @@ namespace fmm {
                         potential_expansions_SoA;
                     struct_of_array_data<space_vector, real, 3, INNER_CELLS, SOA_PADDING>
                         angular_corrections_SoA;
+                        std::ofstream ofs("filename" + std::to_string(hpx::get_worker_thread_num()) );
+
+                            boost::archive::text_oarchive oa(ofs);
+
+                            std::vector<typename my_trait<decltype(local_expansions_staging_area)>::aos_type> local_expansions_staging_area_vector( my_trait<decltype(local_expansions_staging_area)>::entries);
+                            std::vector<space_vector_gen<double> > center_of_masses_staging_area_vector(my_trait<decltype( center_of_masses_staging_area)>::entries);
+                            std::vector<taylor<4, double> > potential_expansions_SoA_vector(my_trait<decltype(potential_expansions_SoA)>::entries);
+                            std::vector<space_vector_gen<double> > angular_corrections_SoA_vector(my_trait<decltype(angular_corrections_SoA)>::entries);
+                            local_expansions_staging_area.to_non_SoA(local_expansions_staging_area_vector);
+                            center_of_masses_staging_area.to_non_SoA(center_of_masses_staging_area_vector);
+                            potential_expansions_SoA.to_non_SoA(potential_expansions_SoA_vector);
+                            angular_corrections_SoA.to_non_SoA(angular_corrections_SoA_vector);
+                            int size = local_expansions_staging_area_vector.size();
+        
+                            oa << neighbor_empty_multipoles;
+                            oa << local_expansions_staging_area_vector;
+                            oa << center_of_masses_staging_area_vector;
+    
+                            oa << potential_expansions_SoA_vector;
+                            oa << angular_corrections_SoA_vector;
+     
+                            oa << type;
+                            oa << x_skip;
+                            oa << y_skip;
+                            oa << z_skip;
+                            std::vector<multiindex<>>& stencil_ = stencil();
+                            oa << stencil_;
+
+
+
                     kernel.apply_stencil(local_expansions_staging_area,
                         center_of_masses_staging_area, potential_expansions_SoA,
-                        angular_corrections_SoA, stencil(), type, x_skip, y_skip, z_skip);
+                        angular_corrections_SoA, stencil_, type, x_skip, y_skip, z_skip);
+                    potential_expansions_SoA.to_non_SoA(potential_expansions_SoA_vector);
+                    angular_corrections_SoA.to_non_SoA(angular_corrections_SoA_vector);
+                    oa << potential_expansions_SoA_vector;
+                    oa << angular_corrections_SoA_vector;
                     potential_expansions_SoA.add_to_non_SoA(grid_ptr->get_L());
                     if (type == RHO) {
                         angular_corrections_SoA.to_non_SoA(grid_ptr->get_L_c());
